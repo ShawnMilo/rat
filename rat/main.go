@@ -34,6 +34,6 @@ func main() {
 		log.Fatal(err)
 	}
 	if resp.StatusCode != 200 {
-		log.Println("%s", resp.Status)
+		log.Println("status:", resp.Status)
 	}
 }
