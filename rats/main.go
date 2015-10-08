@@ -21,7 +21,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad method (POST only)", 405)
 	}
 	r.ParseForm()
-	log.Printf("%q@%q: %q\n", clean(r.PostForm["user"]), clean(r.PostForm["host"]), clean(r.PostForm["message"]))
+	log.Printf("%s@%s: %q\n", clean(r.PostForm["user"]), clean(r.PostForm["host"]), clean(r.PostForm["message"]))
 }
 
 func clean(val []string) string {
