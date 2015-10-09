@@ -73,11 +73,21 @@ func addMessage(msg *Message) {
 func history(w http.ResponseWriter, r *http.Request) {
 	lock.RLock()
 	defer lock.RUnlock()
+	first := len(messages) - 1
+	if first < 0 {
+		fmt.Fprintln(w, "no data")
+		return
+	}
+	last := first - 100
+	if last < 0 {
+		last = 0
+	}
 	fmt.Fprintln(w, "<html><head><title>Rat Log</title></head><body>")
 	fmt.Fprintln(w, "<table><tr><th>stamp</th><th>user</th><th>host</th><th>message</th></tr>")
 
 	// Mon Jan 2 15:04:05 MST 2006
-	for _, m := range messages {
+	for i := first; i >= last; i-- {
+		m := messages[i]
 		fmt.Fprintf(w, "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", m.stamp.Format("2006-01-02 15:04:05"), m.user, m.host, m.message)
 	}
 	fmt.Fprintln(w, "</table></body></html>")
