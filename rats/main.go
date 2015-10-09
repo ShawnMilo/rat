@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -15,8 +16,8 @@ var lock = sync.RWMutex{}
 var maxMessages int = 1000
 
 type Message struct {
-	user, host, message string
-	stamp               time.Time
+	User, Host, Message string
+	Stamp               time.Time
 }
 
 func init() {
@@ -41,13 +42,13 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	msg := &Message{
-		user:    clean(r.PostForm["user"]),
-		host:    clean(r.PostForm["host"]),
-		message: clean(r.PostForm["message"]),
-		stamp:   time.Now(),
+		User:    clean(r.PostForm["user"]),
+		Host:    clean(r.PostForm["host"]),
+		Message: clean(r.PostForm["message"]),
+		Stamp:   time.Now(),
 	}
 	addMessage(msg)
-	log.Printf("%s@%s: %q\n", msg.user, msg.host, msg.message)
+	log.Printf("%s@%s: %q\n", msg.User, msg.Host, msg.Message)
 }
 
 // Just join for now. Maybe more later.
@@ -88,7 +89,16 @@ func history(w http.ResponseWriter, r *http.Request) {
 	// Mon Jan 2 15:04:05 MST 2006
 	for i := first; i >= last; i-- {
 		m := messages[i]
-		fmt.Fprintf(w, "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", m.stamp.Format("2006-01-02 15:04:05"), m.user, m.host, m.message)
+		t, err := template.New("log").Parse("<tr><td>{{.Stamp}}</td><td>{{.User}}</td><td>{{.Host}}</td><td>{{.Message}}</td></tr>\n")
+		if err != nil {
+			http.Error(w, "internal error", 500)
+			return
+		}
+
+		err = t.Execute(w, m)
+		if err != nil {
+			http.Error(w, "internal error", 500)
+		}
 	}
 	fmt.Fprintln(w, "</table></body></html>")
 }
