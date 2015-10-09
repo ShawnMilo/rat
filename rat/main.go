@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -12,7 +13,23 @@ import (
 
 func main() {
 	flag.Parse()
-	message := strings.Join(flag.Args(), " ")
+	var message string
+	var err error
+
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		log.Fatal(err)
+	}
+	if stat.Mode()&os.ModeCharDevice == 0 {
+		stdin, err := ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			log.Fatal(err)
+		}
+		message = string(stdin)
+	} else {
+
+		message = strings.Join(flag.Args(), " ")
+	}
 	params := url.Values{}
 	params.Set("message", message)
 	host, err := os.Hostname()
