@@ -5,7 +5,13 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
+
+type Message struct {
+	user, host, message string
+	stamp               time.Time
+}
 
 func init() {
 	log.SetOutput(os.Stdout)
@@ -21,9 +27,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad method (POST only)", 405)
 	}
 	r.ParseForm()
-	log.Printf("%s@%s: %q\n", clean(r.PostForm["user"]), clean(r.PostForm["host"]), clean(r.PostForm["message"]))
+	m := Message{
+		user:    clean(r.PostForm["user"]),
+		host:    clean(r.PostForm["host"]),
+		message: clean(r.PostForm["message"]),
+		stamp:   time.Now(),
+	}
+	log.Printf("%s@%s: %q\n", m.user, m.host, m.message)
 }
 
+// Just join for now. Maybe more later.
 func clean(val []string) string {
 	return strings.Join(val, " ")
 }
