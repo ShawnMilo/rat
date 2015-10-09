@@ -37,8 +37,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 	err := r.ParseForm()
 	if err != nil {
-
-		log.Println("bad form")
+		http.Error(w, "invalid form data", 400)
 		return
 	}
 	msg := &Message{
