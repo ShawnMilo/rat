@@ -33,8 +33,14 @@ func main() {
 func handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		http.Error(w, "bad method (POST only)", 405)
+		return
 	}
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+
+		log.Println("bad form")
+		return
+	}
 	msg := &Message{
 		user:    clean(r.PostForm["user"]),
 		host:    clean(r.PostForm["host"]),
@@ -71,8 +77,9 @@ func history(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "<html><head><title>Rat Log</title></head><body>")
 	fmt.Fprintln(w, "<table><tr><th>stamp</th><th>user</th><th>host</th><th>message</th></tr>")
 
+	// Mon Jan 2 15:04:05 MST 2006
 	for _, m := range messages {
-		fmt.Fprintf(w, "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", m.stamp, m.user, m.host, m.message)
+		fmt.Fprintf(w, "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>\n", m.stamp.Format("2006-01-02 15:04:05"), m.user, m.host, m.message)
 	}
 	fmt.Fprintln(w, "</table></body></html>")
 }
