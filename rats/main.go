@@ -63,9 +63,8 @@ func addMessage(msg *Message) {
 	if len(messages) >= maxMessages {
 		var tenth int = maxMessages / 10
 		m := make([]*Message, 0, maxMessages)
-		old := messages[maxMessages-tenth:]
-		for i := 0; i < tenth; i++ {
-			m[i] = old[i]
+		for i, val := range messages[maxMessages-tenth : maxMessages-1] {
+			m[i] = val
 		}
 		messages = m
 	}
