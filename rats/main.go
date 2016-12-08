@@ -13,7 +13,7 @@ import (
 
 var messages []*Message
 var lock = sync.RWMutex{}
-var maxMessages int = 1000
+var perPage int = 100
 
 type Message struct {
 	User, Host, Message string
@@ -22,7 +22,7 @@ type Message struct {
 
 func init() {
 	log.SetOutput(os.Stdout)
-	messages = make([]*Message, 0, maxMessages)
+	messages = make([]*Message, 0, perPage)
 }
 
 func main() {
@@ -60,13 +60,15 @@ func addMessage(msg *Message) {
 	lock.Lock()
 	defer lock.Unlock()
 	messages = append(messages, msg)
-	if len(messages) >= maxMessages {
-		var tenth int = maxMessages / 10
-		m := make([]*Message, 0, maxMessages)
-		for i, val := range messages[maxMessages-tenth : maxMessages-1] {
-			m[i] = val
+	count := len(messages)
+	if count >= (perPage * 2) {
+		log.Printf("Recreating list because it has %d things in it.\n", count)
+		m := make([]*Message, 0, count)
+		for _, val := range messages[perPage:] {
+			m = append(m, val)
 		}
 		messages = m
+		log.Printf("List now has %d things in it.\n", len(messages))
 	}
 }
 
@@ -78,7 +80,7 @@ func history(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintln(w, "no data")
 		return
 	}
-	last := first - 100
+	last := first - perPage
 	if last < 0 {
 		last = 0
 	}
