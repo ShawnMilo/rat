@@ -32,19 +32,10 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		http.Error(w, "bad method (POST only)", 405)
-		return
-	}
-	err := r.ParseForm()
-	if err != nil {
-		http.Error(w, "invalid form data", 400)
-		return
-	}
 	msg := &Message{
-		User:    clean(r.PostForm["user"]),
-		Host:    clean(r.PostForm["host"]),
-		Message: clean(r.PostForm["message"]),
+		User:    clean(r.FormValue["user"]),
+		Host:    clean(r.FormValue["host"]),
+		Message: clean(r.FormValue["message"]),
 		Stamp:   time.Now(),
 	}
 	addMessage(msg)
